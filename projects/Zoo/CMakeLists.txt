@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6.2)
 
 PROJECT(Zoo)
 
-include_directories("../../include")
+include_directories("../pugg/include")
 set(SOURCES main.cpp Animal.h)
 
 add_executable(Zoo ${SOURCES})

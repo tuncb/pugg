@@ -31,3 +31,4 @@
 *.out
 *.app
 /test_package/build
+/build

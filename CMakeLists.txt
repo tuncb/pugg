@@ -5,8 +5,8 @@ PROJECT(pugg_examples)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
  
-add_subdirectory(Zoo)
-add_subdirectory(PanthalassaAnimals)
-add_subdirectory(PangeaAnimals)
+add_subdirectory(./Projects/Zoo)
+add_subdirectory(./Projects/PanthalassaAnimals)
+add_subdirectory(./Projects/PangeaAnimals)
 
 
