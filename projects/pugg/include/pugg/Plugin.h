@@ -42,6 +42,9 @@ public:
 #else
 		_handle = dlopen(filename.c_str(), RTLD_NOW);
 #endif
+	if (!_handle) {
+            fprintf(stderr, "%s\n", dlerror()) {
+        }
         return (_handle != NULL);
     }
     fnRegisterPlugin* register_function()
