@@ -42,7 +42,7 @@ public:
 #else
 		_handle = dlopen(filename.c_str(), RTLD_NOW);
 #endif
-		return (_handle != NULL);
+		return (_handle != nullptr);
 	}
 	fnRegisterPlugin* register_function()
 	{
@@ -71,7 +71,7 @@ private:
 class Plugin
 {
 public:
-	Plugin() : _register_function(NULL) {}
+	Plugin() : _register_function(nullptr) {}
 
 	bool load(const std::string& filename)
 	{

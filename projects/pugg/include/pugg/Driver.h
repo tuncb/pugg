@@ -12,7 +12,7 @@ class Driver
 {
 public:
 	Driver(std::string server_name, std::string name, int version)
-		: _server_name(server_name), _name(name), _version(version)
+		: _name(name), _server_name(server_name), _version(version)
 	{}
 	virtual ~Driver() {}
 

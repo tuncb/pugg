@@ -70,7 +70,7 @@ public:
 		if (! driver) return false;
 
 		pugg::detail::Server* server = _get_server(driver->server_name());
-		if (! server) return NULL;
+		if (! server) return false;
 
 		if (server->min_driver_version() > driver->version()) return false;
 
@@ -82,10 +82,10 @@ public:
 	DriverType* get_driver(const std::string& server_name, const std::string& name)
 	{
 		pugg::detail::Server* server = _get_server(server_name);
-		if (! server) return NULL;
+		if (! server) return nullptr;
 
 		std::map<std::string,pugg::Driver*>::iterator driver_iter = server->drivers().find(name);
-		if (driver_iter == server->drivers().end()) return NULL;
+		if (driver_iter == server->drivers().end()) return nullptr;
 		return static_cast<DriverType*>(driver_iter->second);
 	}
 
@@ -138,7 +138,7 @@ protected:
 	{
 		std::map<std::string,pugg::detail::Server*>::iterator server_iter = _servers.find(name);
 		if (server_iter == _servers.end())
-			return NULL;
+			return nullptr;
 		else
 			return server_iter->second;
 	}
