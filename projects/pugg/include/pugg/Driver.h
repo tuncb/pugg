@@ -8,7 +8,7 @@
 
 namespace pugg {
 
-class Driver 
+class Driver
 {
 public:
 	Driver(std::string server_name, std::string name, int version)

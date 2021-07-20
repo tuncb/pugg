@@ -24,7 +24,7 @@ namespace pugg {
 class Kernel;
 
 namespace detail {
-	
+
 typedef void fnRegisterPlugin(pugg::Kernel*);
 
 class DllLoader
