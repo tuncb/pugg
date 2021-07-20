@@ -3,6 +3,7 @@
 
 int main()
 {
-  pugg::Kernel kernel;
-  kernel.load_plugin("donotexists.dll");
+	pugg::Kernel kernel;
+	kernel.load_plugin("donotexists.dll");
 }
+
