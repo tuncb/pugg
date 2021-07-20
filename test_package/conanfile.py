@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake
 import os
+
+from conans import CMake, ConanFile
+
 
 class TestConan(ConanFile):
 	settings = "os", "compiler", "build_type", "arch"
@@ -14,7 +16,7 @@ class TestConan(ConanFile):
 	def imports(self):
 		self.copy("*.dll", dst="bin", src="bin")
 		self.copy("*.dylib*", dst="bin", src="lib")
-		self.copy('*.so*', dst='bin', src='lib')
+		self.copy("*.so*", dst="bin", src="lib")
 
 	def test(self):
 		os.chdir("bin")
