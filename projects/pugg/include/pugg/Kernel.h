@@ -8,6 +8,11 @@
 #include <map>
 #include <vector>
 
+#ifdef _WIN32
+	#include <windows.h>
+	#include <cwchar>
+#endif
+
 #include "Driver.h"
 #include "Plugin.h"
 
@@ -116,6 +121,21 @@ public:
 			return false;
 		}
 	}
+
+	#if WIN32
+	bool load_plugin(const std::wstring& filename)
+	{
+		pugg::detail::Plugin* plugin = new pugg::detail::Plugin();
+		if (plugin->load(filename)) {
+			plugin->register_plugin(this);
+			_plugins.push_back(plugin);
+			return true;
+		} else {
+			delete plugin;
+			return false;
+		}
+	}
+	#endif
 
 	void clear_drivers()
 	{

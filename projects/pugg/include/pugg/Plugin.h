@@ -44,6 +44,16 @@ public:
 #endif
 		return (_handle != nullptr);
 	}
+
+
+#ifdef WIN32
+	bool load(std::wstring filename)
+	{
+		_handle = LoadLibraryW(filename.c_str());
+		return (_handle != nullptr);
+	}
+#endif
+
 	fnRegisterPlugin* register_function()
 	{
 #ifdef WIN32
@@ -85,6 +95,21 @@ public:
 			return false;
 		}
 	}
+
+	#if WIN32
+	bool load(const std::wstring& filename)
+	{
+		if (! _dll_loader.load(filename)) return false;
+		_register_function = _dll_loader.register_function();
+
+		if (_register_function) {
+			return true;
+		} else {
+			_dll_loader.free();
+			return false;
+		}
+	}
+	#endif
 
 	void register_plugin(pugg::Kernel* kernel)
 	{
