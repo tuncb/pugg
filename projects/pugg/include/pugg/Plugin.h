@@ -18,6 +18,7 @@
 #else
 	#include <dlfcn.h>
 #endif
+#include <stdexcept>
 
 namespace pugg {
 
@@ -41,6 +42,9 @@ public:
 		_handle = LoadLibraryA(filename.c_str());
 #else
 		_handle = dlopen(filename.c_str(), RTLD_NOW);
+		if(!_handle){
+			throw std::runtime_error(dlerror());
+		}
 #endif
 		return (_handle != nullptr);
 	}
@@ -50,6 +54,33 @@ public:
 	bool load(std::wstring filename)
 	{
 		_handle = LoadLibraryW(filename.c_str());
+		if(!_handle){
+			auto errorCode = GetLastError();
+			LPVOID lpMsgBuf;
+			std::string msg;
+			constexpr auto flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
+			auto sz = FormatMessageA(
+				flags,
+				nullptr,
+				errorCode,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				nullptr,
+				0,
+				nullptr
+			);
+			msg.reserve(sz);
+			msg.resize(sz);
+			FormatMessageA(
+				flags,
+				nullptr,
+				errorCode,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				msg.data(),
+				0,
+				nullptr
+			);
+			throw std::runtime_error(msg);
+		}
 		return (_handle != nullptr);
 	}
 #endif
