@@ -3,10 +3,7 @@ cmake_minimum_required(VERSION 2.6.2)
 
 PROJECT(PanthalassaAnimals)
 
-include_directories("../pugg/include")
-include_directories("../Zoo")
-
 set(SOURCES plugin.cpp Fish.h Whale.h)
 
 add_library(PanthalassaAnimals SHARED ${SOURCES})
-
+target_link_libraries(PanthalassaAnimals PUBLIC IZoo pugg)
