@@ -10,3 +10,4 @@ set(SOURCES plugin.cpp Fish.h Whale.h)
 
 add_library(PanthalassaAnimals SHARED ${SOURCES})
 
+ 
