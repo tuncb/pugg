@@ -25,6 +25,7 @@
 *.la
 *.a
 *.lib
+.vs
 
 # Executables
 *.exe
@@ -32,3 +33,4 @@
 *.app
 /test_package/build
 /build
+/out
