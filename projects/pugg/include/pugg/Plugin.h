@@ -18,11 +18,9 @@
 namespace pugg
 {
 
-class Kernel;
-
 namespace detail
 {
-typedef void fnRegisterPlugin(pugg::Kernel *);
+
 
 #ifdef WIN32
 using HandleType = HMODULE;
@@ -94,44 +92,23 @@ public:
       freeDll(_handle);
   }
 
-  auto handle() -> HandleType
+  auto isValid() const -> bool
+  {
+    return _handle != nullptr;
+  }
+
+  template <typename FuncType> auto getFunction(const std::string &name) const -> FuncType *
+  {
+    return ::pugg::detail::getFunction<FuncType>(_handle, name);
+  }
+
+  auto handle() const -> HandleType
   {
     return _handle;
   }
 
 private:
   HandleType _handle;
-};
-
-class Plugin
-{
-public:
-  Plugin() : _register_function(nullptr), _dllHandle({nullptr})
-  {
-  }
-
-  bool load(const std::string &filename)
-  {
-    auto dllHandle = DllHandle{loadDll(filename)};
-    if (!dllHandle.handle())
-      return false;
-
-    _register_function = getFunction<fnRegisterPlugin>(_dllHandle.handle(), "register_pugg_plugin");
-    if (!_register_function)
-      return false;
-
-    _dllHandle = std::move(dllHandle);
-    return true;
-  }
-
-  void register_plugin(pugg::Kernel *kernel)
-  {
-    _register_function(kernel);
-  }
-
-private:
-  fnRegisterPlugin *_register_function;
-  DllHandle _dllHandle;
 };
 
 } // namespace detail

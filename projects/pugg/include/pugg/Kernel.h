@@ -14,18 +14,26 @@ class Kernel;
 namespace detail
 {
 
+typedef void fnRegisterPlugin(pugg::Kernel *);
+
+auto registerDll(pugg::Kernel *kernel, const DllHandle &dllHandle) -> bool
+{
+  if (!dllHandle.isValid())
+    return false;
+
+  auto func = dllHandle.getFunction<fnRegisterPlugin>("register_pugg_plugin");
+  if (func == nullptr)
+    return false;
+
+  func(kernel);
+  return true;
+}
+
 template <class K, class V> void delete_all_values(std::map<K, V> &map)
 {
   for (typename std::map<K, V>::iterator iter = map.begin(); iter != map.end(); ++iter)
   {
     delete iter->second;
-  }
-}
-template <class V> void delete_all_values(std::vector<V> &vec)
-{
-  for (typename std::vector<V>::iterator iter = vec.begin(); iter != vec.end(); ++iter)
-  {
-    delete *iter;
   }
 }
 
@@ -71,7 +79,6 @@ public:
   virtual ~Kernel()
   {
     pugg::detail::delete_all_values(_servers);
-    pugg::detail::delete_all_values(_plugins);
   }
 
   void add_server(std::string name, int min_driver_version)
@@ -125,18 +132,16 @@ public:
 
   bool load_plugin(const std::string &filename)
   {
-    pugg::detail::Plugin *plugin = new pugg::detail::Plugin();
-    if (plugin->load(filename))
+    using namespace pugg::detail;
+    auto dllHandle = DllHandle{loadDll(filename)};
+;
+    if (registerDll(this, dllHandle))
     {
-      plugin->register_plugin(this);
-      _plugins.push_back(plugin);
+      _plugins.push_back(std::move(dllHandle));
       return true;
     }
-    else
-    {
-      delete plugin;
-      return false;
-    }
+
+    return false;
   }
 
   void clear_drivers()
@@ -151,12 +156,12 @@ public:
   void clear()
   {
     pugg::detail::delete_all_values(_servers);
-    pugg::detail::delete_all_values(_plugins);
+    _plugins.clear();
   }
 
 protected:
   std::map<std::string, pugg::detail::Server *> _servers;
-  std::vector<pugg::detail::Plugin *> _plugins;
+  std::vector<pugg::detail::DllHandle> _plugins;
 
   pugg::detail::Server *_get_server(const std::string &name)
   {
