@@ -32,3 +32,6 @@
 *.app
 /test_package/build
 /build
+/out
+/.vscode
+/.vs

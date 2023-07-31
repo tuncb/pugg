@@ -9,7 +9,7 @@ if exist %build_folder% rd /q /s %build_folder% || goto :FINALLY
 md %build_folder% || goto :FINALLY
 cd %build_folder% || goto :FINALLY
 
-cmake -G "Visual Studio 15 2017 Win64" ../ || goto :FINALLY
+cmake -G "Visual Studio 17 2022" -A Win64 ../ || goto :FINALLY
 
 echo Success :)
 
