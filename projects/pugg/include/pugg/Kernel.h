@@ -8,26 +8,8 @@
 
 namespace pugg
 {
-
-class Kernel;
-
 namespace detail
 {
-
-typedef void fnRegisterPlugin(pugg::Kernel *);
-
-auto registerDll(pugg::Kernel *kernel, const DllHandle &dllHandle) -> bool
-{
-  if (!dllHandle.isValid())
-    return false;
-
-  auto func = dllHandle.getFunction<fnRegisterPlugin>("register_pugg_plugin");
-  if (func == nullptr)
-    return false;
-
-  func(kernel);
-  return true;
-}
 
 struct Server
 {
@@ -91,11 +73,17 @@ public:
 
   bool load_plugin(const std::string &filename)
   {
+    typedef void fnRegisterPlugin(pugg::Kernel *);
+
     using namespace pugg::detail;
     auto dllHandle = DllHandle{loadDll(filename)};
-    ;
-    if (registerDll(this, dllHandle))
+    if (!dllHandle.isValid())
+      return false;
+
+    auto registerFunc = dllHandle.getFunction<fnRegisterPlugin>("register_pugg_plugin");
+    if (registerFunc)
     {
+      registerFunc(this);
       _plugins.push_back(std::move(dllHandle));
       return true;
     }
