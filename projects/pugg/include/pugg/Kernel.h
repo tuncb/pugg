@@ -50,24 +50,25 @@ public:
     if (!driver)
       return false;
 
-    pugg::detail::Server *server = _get_server(driver->server_name());
-    if (!server)
+    auto server_iter = _servers.find(driver->server_name());
+
+    if (server_iter == _servers.end())
       return NULL;
 
-    if (server->min_driver_version > driver->version())
+    if (server_iter->second.min_driver_version > driver->version())
       return false;
 
-    server->drivers[driver->name()] = std::unique_ptr<pugg::Driver>(driver);
+    server_iter->second.drivers[driver->name()] = std::unique_ptr<pugg::Driver>(driver);
     return true;
   }
 
   template <class DriverType> DriverType *get_driver(const std::string &server_name, const std::string &name)
   {
-    pugg::detail::Server *server = _get_server(server_name);
-    if (!server)
+    auto server_iter = _servers.find(server_name);
+    if (server_iter == _servers.end())
       return NULL;
 
-    std::map<std::string, pugg::Driver *>::iterator driver_iter = server->drivers().find(name);
+    std::map<std::string, pugg::Driver *>::iterator driver_iter = server_iter->drivers().find(name);
     if (driver_iter == server->drivers().end())
       return NULL;
     return static_cast<DriverType *>(driver_iter->second);
@@ -77,11 +78,11 @@ public:
   {
     std::vector<DriverType *> drivers;
 
-    pugg::detail::Server *server = _get_server(server_name);
-    if (!server)
+    auto server_iter = _servers.find(server_name);
+    if (server_iter == _servers.end())
       return drivers;
 
-    for (auto iter = server->drivers.begin(); iter != server->drivers.end(); ++iter)
+    for (auto iter = server_iter->second.drivers.begin(); iter != server_iter->second.drivers.end(); ++iter)
     {
       drivers.push_back(static_cast<DriverType *>(iter->second.get()));
     }
@@ -119,15 +120,6 @@ public:
 protected:
   std::map<std::string, pugg::detail::Server> _servers;
   std::vector<pugg::detail::DllHandle> _plugins;
-
-  pugg::detail::Server *_get_server(const std::string &name)
-  {
-    auto server_iter = _servers.find(name);
-    if (server_iter == _servers.end())
-      return nullptr;
-    else
-      return &server_iter->second;
-  }
 };
 
 } // namespace pugg
