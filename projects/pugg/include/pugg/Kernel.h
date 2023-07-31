@@ -35,7 +35,7 @@ public:
     auto server_iter = _servers.find(driver->server_name());
 
     if (server_iter == _servers.end())
-      return NULL;
+      return nullptr;
 
     if (server_iter->second.min_driver_version > driver->version())
       return false;
@@ -48,11 +48,11 @@ public:
   {
     auto server_iter = _servers.find(server_name);
     if (server_iter == _servers.end())
-      return NULL;
+      return nullptr;
 
     std::map<std::string, pugg::Driver *>::iterator driver_iter = server_iter->drivers().find(name);
     if (driver_iter == server->drivers().end())
-      return NULL;
+      return nullptr;
     return static_cast<DriverType *>(driver_iter->second);
   }
 
