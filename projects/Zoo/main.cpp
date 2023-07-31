@@ -30,10 +30,9 @@ int main()
 
   vector<AnimalDriver *> drivers = kernel.get_all_drivers<AnimalDriver>(Animal::server_name());
   vector<std::unique_ptr<Animal>> animals;
-  for (vector<AnimalDriver *>::iterator iter = drivers.begin(); iter != drivers.end(); ++iter)
+  for (auto&& driver: drivers)
   {
-    AnimalDriver &driver = *(*iter);
-    animals.push_back(std::unique_ptr<Animal>(driver.create()));
+    animals.push_back(std::unique_ptr<Animal>(driver->create()));
   }
 
   for (auto&& animal : animals)
