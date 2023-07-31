@@ -37,39 +37,11 @@ template <class K, class V> void delete_all_values(std::map<K, V> &map)
   }
 }
 
-class Server
+struct Server
 {
-public:
-  Server(std::string name, int min_driver_version) : _name(name), _min_driver_version(min_driver_version)
-  {
-  }
-  ~Server()
-  {
-    delete_all_values(_drivers);
-  }
-
-  std::string name()
-  {
-    return _name;
-  }
-  int min_driver_version()
-  {
-    return _min_driver_version;
-  }
-  std::map<std::string, Driver *> &drivers()
-  {
-    return _drivers;
-  }
-
-  void clear()
-  {
-    delete_all_values(_drivers);
-  }
-
-private:
-  std::string _name;
-  int _min_driver_version;
-  std::map<std::string, Driver *> _drivers;
+  std::string name;
+  int min_driver_version;
+  std::map<std::string, std::unique_ptr<Driver>> drivers;
 };
 } // namespace detail
 
@@ -83,7 +55,7 @@ public:
 
   void add_server(std::string name, int min_driver_version)
   {
-    _servers[name] = new pugg::detail::Server(name, min_driver_version);
+    _servers[name] = new pugg::detail::Server{name, min_driver_version};
   }
 
   bool add_driver(pugg::Driver *driver)
@@ -95,10 +67,10 @@ public:
     if (!server)
       return NULL;
 
-    if (server->min_driver_version() > driver->version())
+    if (server->min_driver_version > driver->version())
       return false;
 
-    server->drivers()[driver->name()] = driver;
+    server->drivers[driver->name()] = std::unique_ptr<pugg::Driver>(driver);
     return true;
   }
 
@@ -122,10 +94,9 @@ public:
     if (!server)
       return drivers;
 
-    for (std::map<std::string, pugg::Driver *>::iterator iter = server->drivers().begin();
-         iter != server->drivers().end(); ++iter)
+    for (auto iter = server->drivers.begin(); iter != server->drivers.end(); ++iter)
     {
-      drivers.push_back(static_cast<DriverType *>(iter->second));
+      drivers.push_back(static_cast<DriverType *>(iter->second.get()));
     }
     return drivers;
   }
@@ -134,7 +105,7 @@ public:
   {
     using namespace pugg::detail;
     auto dllHandle = DllHandle{loadDll(filename)};
-;
+    ;
     if (registerDll(this, dllHandle))
     {
       _plugins.push_back(std::move(dllHandle));
@@ -149,7 +120,7 @@ public:
     for (std::map<std::string, pugg::detail::Server *>::iterator iter = _servers.begin(); iter != _servers.end();
          ++iter)
     {
-      iter->second->clear();
+      iter->second->drivers.clear();
     }
   }
 
