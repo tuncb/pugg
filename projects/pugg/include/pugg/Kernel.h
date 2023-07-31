@@ -29,14 +29,6 @@ auto registerDll(pugg::Kernel *kernel, const DllHandle &dllHandle) -> bool
   return true;
 }
 
-template <class K, class V> void delete_all_values(std::map<K, V> &map)
-{
-  for (typename std::map<K, V>::iterator iter = map.begin(); iter != map.end(); ++iter)
-  {
-    delete iter->second;
-  }
-}
-
 struct Server
 {
   std::string name;
@@ -48,14 +40,9 @@ struct Server
 class Kernel
 {
 public:
-  virtual ~Kernel()
-  {
-    pugg::detail::delete_all_values(_servers);
-  }
-
   void add_server(std::string name, int min_driver_version)
   {
-    _servers[name] = new pugg::detail::Server{name, min_driver_version};
+    _servers[name] = pugg::detail::Server{name, min_driver_version};
   }
 
   bool add_driver(pugg::Driver *driver)
@@ -117,30 +104,29 @@ public:
 
   void clear_drivers()
   {
-    for (std::map<std::string, pugg::detail::Server *>::iterator iter = _servers.begin(); iter != _servers.end();
-         ++iter)
+    for (auto iter = _servers.begin(); iter != _servers.end(); ++iter)
     {
-      iter->second->drivers.clear();
+      iter->second.drivers.clear();
     }
   }
 
   void clear()
   {
-    pugg::detail::delete_all_values(_servers);
+    _servers.clear();
     _plugins.clear();
   }
 
 protected:
-  std::map<std::string, pugg::detail::Server *> _servers;
+  std::map<std::string, pugg::detail::Server> _servers;
   std::vector<pugg::detail::DllHandle> _plugins;
 
   pugg::detail::Server *_get_server(const std::string &name)
   {
-    std::map<std::string, pugg::detail::Server *>::iterator server_iter = _servers.find(name);
+    auto server_iter = _servers.find(name);
     if (server_iter == _servers.end())
       return NULL;
     else
-      return server_iter->second;
+      return &server_iter->second;
   }
 };
 
