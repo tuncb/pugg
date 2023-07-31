@@ -124,7 +124,7 @@ protected:
   {
     auto server_iter = _servers.find(name);
     if (server_iter == _servers.end())
-      return NULL;
+      return nullptr;
     else
       return &server_iter->second;
   }
