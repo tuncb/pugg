@@ -15,12 +15,6 @@
 #endif
 #include <memory>
 
-#ifdef WIN32
-using HandleType = HMODULE;
-#else
-using HandleType = void *;
-#endif
-
 namespace pugg
 {
 
@@ -28,62 +22,101 @@ class Kernel;
 
 namespace detail
 {
-
 typedef void fnRegisterPlugin(pugg::Kernel *);
 
-struct DllHandle
-{
-  HandleType handle;
-};
+#ifdef WIN32
+using HandleType = HMODULE;
 
-struct DllHandleDeleter
+auto freeDll(HandleType handle)
 {
-  void operator()(DllHandle *dllHandle)
+  FreeLibrary(handle);
+}
+
+template <typename FuncType> auto getFunction(HandleType handle, const std::string &name) -> FuncType *
+{
+  return reinterpret_cast<FuncType *>(GetProcAddress(handle, name.c_str()));
+}
+
+auto loadDll(const std::string &filename) -> HandleType
+{
+  return LoadLibraryA(filename.c_str());
+}
+
+#else
+using HandleType = void *;
+
+auto freeDll(HandleType handle)
+{
+  dlclose(_handle);
+}
+
+template <typename FuncType> auto getFunction(HandleType handle, const std::string &name) -> FuncType *
+{
+  return reinterpret_cast<FuncType *>(dlsym(dllHandle.handle, name.c_str());
+}
+
+auto loadDll(const std::string &filename) -> HandleType
+{
+  return DllHandle{dlopen(filename.c_str(), RTLD_NOW)};
+}
+
+#endif
+
+class DllHandle
+{
+public:
+  DllHandle(HandleType handle) : _handle(handle)
   {
-    if (dllHandle->handle)
-    {
-#ifdef WIN32
-      FreeLibrary(dllHandle->handle);
-#else
-      dlclose(_handle);
-#endif
-    }
-    delete dllHandle;
   }
+
+  DllHandle(const DllHandle &) = delete;
+  DllHandle &operator=(DllHandle const &) = delete;
+
+  DllHandle(DllHandle &&other)
+  {
+    _handle = other._handle;
+    other._handle = nullptr;
+  }
+  DllHandle &operator=(DllHandle &&other)
+  {
+    if (this != &other)
+    {
+      _handle = other._handle;
+      other._handle = nullptr;
+    }
+
+    return *this;
+  }
+
+  ~DllHandle()
+  {
+    if (_handle)
+      freeDll(_handle);
+  }
+
+  auto handle() -> HandleType
+  {
+    return _handle;
+  }
+
+private:
+  HandleType _handle;
 };
-
-fnRegisterPlugin *getRegisterFunc(const DllHandle &dllHandle)
-{
-#ifdef WIN32
-  return reinterpret_cast<fnRegisterPlugin *>(GetProcAddress(dllHandle.handle, "register_pugg_plugin"));
-#else
-  return reinterpret_cast<fnRegisterPlugin *>(dlsym(dllHandle.handle, "register_pugg_plugin"));
-#endif
-}
-
-auto loadDll(const std::string &filename) -> std::unique_ptr<DllHandle, DllHandleDeleter>
-{
-#ifdef WIN32
-  return std::unique_ptr<DllHandle, DllHandleDeleter>(new DllHandle{LoadLibraryA(filename.c_str())});
-#else
-  return std::unique_ptr<DllHandle, DllHandleDeleter>(new DllHandle{dlopen(filename.c_str(), RTLD_NOW)});
-#endif
-}
 
 class Plugin
 {
 public:
-  Plugin() : _register_function(NULL)
+  Plugin() : _register_function(nullptr), _dllHandle({nullptr})
   {
   }
 
   bool load(const std::string &filename)
   {
-    auto dllHandle = loadDll(filename);
-    if (!dllHandle->handle)
+    auto dllHandle = DllHandle{loadDll(filename)};
+    if (!dllHandle.handle())
       return false;
 
-    _register_function = getRegisterFunc(*dllHandle);
+    _register_function = getFunction<fnRegisterPlugin>(_dllHandle.handle(), "register_pugg_plugin");
     if (!_register_function)
       return false;
 
@@ -98,7 +131,7 @@ public:
 
 private:
   fnRegisterPlugin *_register_function;
-  std::unique_ptr<DllHandle, DllHandleDeleter> _dllHandle;
+  DllHandle _dllHandle;
 };
 
 } // namespace detail
