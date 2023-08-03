@@ -214,30 +214,18 @@ public:
 
 }
 ~~~~
-Release Notes
-------
-**1.0.0**
-
-Added clear methods. 1.0.0 release.
-
-**0.60**
-
-Finally Pugg supports Linux. CMAKE is used for creating the example projects on different platforms.
-
-**0.50**
-
-This version is an attempt to get back to Pugg development. Thus I replaced most of the code from the previous version with the version I use in my own projects. I omitted C++11 code (mostly auto and unique_ptr) in order not to break old compilers.
-
-Wstring support is removed as it complicates the code a and I don't think it is used by anyone (If I'm wrong mail me and I will add it back).
-
-Name convention changes break old code but it won't be very hard to replace old code.
 
 History
 --------
+1.0.1
+* internal code improvements
+* removed conan support
+
 1.0.0
 * Main repository is moved to Bitbucket.
 * Added clear methods.
 * 1.0.0 release.
+
 0.60
 * Linux support
 * Bug fixes, Code improvements etc...

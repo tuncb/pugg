@@ -28,24 +28,19 @@ int main()
   kernel.load_plugin(DLL_PANTHALASSA_ANIMALS);
   kernel.load_plugin(DLL_PANGEA_ANIMALS);
 
+  auto driver = kernel.get_driver<AnimalDriver>(Animal::server_name(), "DogDriver");
+  cout << "driver = " << driver->name();
   vector<AnimalDriver *> drivers = kernel.get_all_drivers<AnimalDriver>(Animal::server_name());
-  vector<Animal *> animals;
-  for (vector<AnimalDriver *>::iterator iter = drivers.begin(); iter != drivers.end(); ++iter)
+  vector<std::unique_ptr<Animal>> animals;
+  for (auto&& driver: drivers)
   {
-    AnimalDriver &driver = *(*iter);
-    animals.push_back(driver.create());
+    animals.push_back(std::unique_ptr<Animal>(driver->create()));
   }
 
-  for (vector<Animal *>::iterator iter = animals.begin(); iter != animals.end(); ++iter)
+  for (auto&& animal : animals)
   {
-    Animal &animal = *(*iter);
-    cout << "Animal kind = " << animal.kind() << endl;
-    cout << "Can Animal Swim = " << animal.can_swim() << endl;
-  }
-
-  for (vector<Animal *>::iterator iter = animals.begin(); iter != animals.end(); ++iter)
-  {
-    delete *iter;
+    cout << "Animal kind = " << animal->kind() << endl;
+    cout << "Can Animal Swim = " << animal->can_swim() << endl;
   }
 
   cout << "Press ENTER to exit..." << endl;
