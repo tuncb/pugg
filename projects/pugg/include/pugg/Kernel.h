@@ -50,8 +50,8 @@ public:
     if (server_iter == _servers.end())
       return nullptr;
 
-    std::map<std::string, pugg::Driver *>::iterator driver_iter = server_iter->drivers.find(name);
-    if (driver_iter == server_iter->drivers.end())
+    auto driver_iter = server_iter.second->drivers.find(name);
+    if (driver_iter == server_iter.second->drivers.end())
       return nullptr;
     return static_cast<DriverType *>(driver_iter->second);
   }
