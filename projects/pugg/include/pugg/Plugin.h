@@ -50,7 +50,7 @@ auto freeDll(HandleType handle)
 
 template <typename FuncType> auto getFunction(HandleType handle, const std::string &name) -> FuncType *
 {
-  return reinterpret_cast<FuncType *>(dlsym(handle, name.c_str());
+  return reinterpret_cast<FuncType *>(dlsym(handle, name.c_str()));
 }
 
 auto loadDll(const std::string &filename) -> HandleType

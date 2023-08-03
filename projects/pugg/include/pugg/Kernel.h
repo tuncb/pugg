@@ -50,10 +50,10 @@ public:
     if (server_iter == _servers.end())
       return nullptr;
 
-    auto driver_iter = server_iter.second->drivers.find(name);
-    if (driver_iter == server_iter.second->drivers.end())
+    auto driver_iter = server_iter->second.drivers.find(name);
+    if (driver_iter == server_iter->second.drivers.end())
       return nullptr;
-    return static_cast<DriverType *>(driver_iter->second);
+    return static_cast<DriverType *>(driver_iter->second.get());
   }
 
   template <class DriverType> std::vector<DriverType *> get_all_drivers(const std::string &server_name)

@@ -28,6 +28,8 @@ int main()
   kernel.load_plugin(DLL_PANTHALASSA_ANIMALS);
   kernel.load_plugin(DLL_PANGEA_ANIMALS);
 
+  auto driver = kernel.get_driver<AnimalDriver>(Animal::server_name(), "DogDriver");
+  cout << "driver = " << driver->name();
   vector<AnimalDriver *> drivers = kernel.get_all_drivers<AnimalDriver>(Animal::server_name());
   vector<std::unique_ptr<Animal>> animals;
   for (auto&& driver: drivers)
