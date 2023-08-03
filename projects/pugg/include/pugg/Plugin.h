@@ -45,17 +45,17 @@ using HandleType = void *;
 
 auto freeDll(HandleType handle)
 {
-  dlclose(_handle);
+  dlclose(handle);
 }
 
 template <typename FuncType> auto getFunction(HandleType handle, const std::string &name) -> FuncType *
 {
-  return reinterpret_cast<FuncType *>(dlsym(dllHandle.handle, name.c_str());
+  return reinterpret_cast<FuncType *>(dlsym(handle, name.c_str());
 }
 
 auto loadDll(const std::string &filename) -> HandleType
 {
-  return DllHandle{dlopen(filename.c_str(), RTLD_NOW)};
+  return dlopen(filename.c_str(), RTLD_NOW);
 }
 
 #endif
