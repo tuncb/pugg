@@ -3,7 +3,7 @@ Pugg 1.0.0
 
 A Simple C++ Framework to load classes from dll files in an OO way.
 
-**Contact** For bugs, feature requests and other stuff:  
+**Contact** For bugs, feature requests and other stuff:
 Tunç Bahçecioğlu tunc.bahcecioglu@gmail.com
 
 * [Pugg @ Bitbucket](https://bitbucket.org/onezeroplus/pugg/)
@@ -15,11 +15,11 @@ Credits
 * [nuclex blog](http://blog.nuclex-games.com/tutorials/cxx/plugin-architecture/) for giving me the idea and the basic source code to implement pugg.
 * Sebastian (hackspider) for bugfix.
 * Szymon Janikowski for fix in old tutorial.
-* Alex Elzenaar for code improvements and code for Linux support. 
+* Alex Elzenaar for code improvements and code for Linux support.
 
 Features
 ----
-* Auto loading of dll files and classes 
+* Auto loading of dll files and classes
 * Version control for loaded plugins
 * Header only library
 * OOP Design
@@ -51,7 +51,7 @@ public:
 };
 ~~~~
 
-You want to load subclasses of Animal from dll files. 
+You want to load subclasses of Animal from dll files.
 
 Add a version and a name to create a server:
 
@@ -71,7 +71,7 @@ Then add a driver to tell the name and version of the server to Pugg.
 class AnimalDriver : public pugg::Driver
 {
 public:
-    AnimalDriver(std::string name, int version) :                   
+    AnimalDriver(std::string name, int version) :
         pugg::Driver(Animal::server_name(),name,version) {}
     virtual Animal* create() = 0;
 };
@@ -108,7 +108,7 @@ Let's export the Cat class from dll.
 #  define EXPORTIT
 #endif
 
-extern "C" EXPORTIT void register_pugg_plugin(pugg::Kernel* kernel) 
+extern "C" EXPORTIT void register_pugg_plugin(pugg::Kernel* kernel)
 {
 	kernel->add_driver(new CatDriver());
 }
@@ -125,12 +125,12 @@ Now in our main app, we can import dlls and have fun
 
 using namespace std;
 
-int main() 
+int main()
 {
-    cout << "Loading plugins..." << endl;  
+    cout << "Loading plugins..." << endl;
     pugg::Kernel kernel;
-    kernel.add_server(Animal::server_name(), Animal::version);  
-#ifdef WIN32      
+    kernel.add_server(Animal::server_name(), Animal::version);
+#ifdef WIN32
     kernel.load_plugin("PangeaAnimals.dll"); // Cat class is in this dll.
 #else
     kernel.load_plugin("libPangeaAnimals.so");
@@ -165,7 +165,7 @@ Driver class registers user class to Pugg.
 ~~~~cpp
 // /include/pugg/Driver.h
 namespace pugg {
-class Driver 
+class Driver
 {
 public:
     // server_name : Name of the server driver belongs to.
@@ -194,50 +194,38 @@ public:
     bool load_plugin(const std::string& filename);
     // adds a server
     // name               : name of the server
-    // min_driver_version : minimum driver version to load to server. 
+    // min_driver_version : minimum driver version to load to server.
     //                      Lower version drivers are not loaded.
     void add_server(std::string name, int min_driver_version );
     // adds a driver. usually called in the register_pugg_plugin function of dlls.
     bool add_driver(pugg::Driver* driver);
-    
+
     // gets a specific driver from a server
     template <class DriverType>
     DriverType* get_driver(const std::string& server_name, const std::string& name);
     // gets all drivers from a server
     template <class DriverType>
-    std::vector<DriverType*> get_all_drivers(const std::string& server_name);  
-    // clears all drivers    
-    void clear_drivers();    
-    // clears all drivers, servers and plugins    
+    std::vector<DriverType*> get_all_drivers(const std::string& server_name);
+    // clears all drivers
+    void clear_drivers();
+    // clears all drivers, servers and plugins
     void clear();
 };
 
 }
 ~~~~
-Release Notes
-------
-**1.0.0** 
-
-Added clear methods. 1.0.0 release.
-
-**0.60**
-
-Finally Pugg supports Linux. CMAKE is used for creating the example projects on different platforms. 
-
-**0.50**  
-
-This version is an attempt to get back to Pugg development. Thus I replaced most of the code from the previous version with the version I use in my own projects. I omitted C++11 code (mostly auto and unique_ptr) in order not to break old compilers. 
-
-Wstring support is removed as it complicates the code a and I don't think it is used by anyone (If I'm wrong mail me and I will add it back).
-
-Name convention changes break old code but it won't be very hard to replace old code.
 
 History
 --------
+1.0.1
+* internal code improvements
+* removed conan support
+
 1.0.0
 * Main repository is moved to Bitbucket.
 * Added clear methods.
-* 1.0.0 release. 
+* 1.0.0 release.
+
 0.60
 * Linux support
 * Bug fixes, Code improvements etc...
@@ -270,12 +258,15 @@ History
 0.21
 * Bug Fix related to UNICODE support
 
-0.2 
+0.2
 * Version control system on plug-in system is removed. Every driver's version is controlled separately.
 * Server class became template, removing the need to write a server class for every driver and casting the drivers before usage.
 
-0.11 
-* Bug fixes 
+0.11
+* Bug fixes
 
-0.1 
+0.1
 * Initial release
+
+
+[![Build](https://github.com/tuncb/pugg/actions/workflows/cmake.yml/badge.svg)](https://github.com/tuncb/pugg/actions/workflows/cmake.yml)

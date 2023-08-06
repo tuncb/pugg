@@ -1,8 +1,3 @@
-//          Copyright Tunc Bahcecioglu 2009 - 2013.
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
 #pragma once
 
 #include <string>
@@ -18,97 +13,102 @@
 #else
 #include <dlfcn.h>
 #endif
+#include <memory>
 
 namespace pugg
 {
 
-class Kernel;
-
 namespace detail
 {
 
-typedef void fnRegisterPlugin(pugg::Kernel *);
 
-class DllLoader
+#ifdef WIN32
+using HandleType = HMODULE;
+
+auto freeDll(HandleType handle)
+{
+  FreeLibrary(handle);
+}
+
+template <typename FuncType> auto getFunction(HandleType handle, const std::string &name) -> FuncType *
+{
+  return reinterpret_cast<FuncType *>(GetProcAddress(handle, name.c_str()));
+}
+
+auto loadDll(const std::string &filename) -> HandleType
+{
+  return LoadLibraryA(filename.c_str());
+}
+
+#else
+using HandleType = void *;
+
+auto freeDll(HandleType handle)
+{
+  dlclose(handle);
+}
+
+template <typename FuncType> auto getFunction(HandleType handle, const std::string &name) -> FuncType *
+{
+  return reinterpret_cast<FuncType *>(dlsym(handle, name.c_str()));
+}
+
+auto loadDll(const std::string &filename) -> HandleType
+{
+  return dlopen(filename.c_str(), RTLD_NOW);
+}
+
+#endif
+
+class DllHandle
 {
 public:
-  ~DllLoader()
+  DllHandle(HandleType handle) : _handle(handle)
   {
-    this->free();
   }
 
-  bool load(std::string filename)
+  DllHandle(const DllHandle &) = delete;
+  DllHandle &operator=(DllHandle const &) = delete;
+
+  DllHandle(DllHandle &&other)
   {
-#ifdef WIN32
-    _handle = LoadLibraryA(filename.c_str());
-#else
-    _handle = dlopen(filename.c_str(), RTLD_NOW);
-#endif
-    return (_handle != NULL);
+    _handle = other._handle;
+    other._handle = nullptr;
   }
-  fnRegisterPlugin *register_function()
+  DllHandle &operator=(DllHandle &&other)
   {
-#ifdef WIN32
-    return reinterpret_cast<fnRegisterPlugin *>(GetProcAddress(_handle, "register_pugg_plugin"));
-#else
-    return reinterpret_cast<fnRegisterPlugin *>(dlsym(_handle, "register_pugg_plugin"));
-#endif
+    if (this != &other)
+    {
+      _handle = other._handle;
+      other._handle = nullptr;
+    }
+
+    return *this;
   }
-  void free()
+
+  ~DllHandle()
   {
-#ifdef WIN32
     if (_handle)
-    {
-      FreeLibrary(_handle);
-    }
-#else
-    if (_handle)
-    {
-      dlclose(_handle);
-    }
-#endif
+      freeDll(_handle);
+  }
+
+  auto isValid() const -> bool
+  {
+    return _handle != nullptr;
+  }
+
+  template <typename FuncType> auto getFunction(const std::string &name) const -> FuncType *
+  {
+    return ::pugg::detail::getFunction<FuncType>(_handle, name);
+  }
+
+  auto handle() const -> HandleType
+  {
+    return _handle;
   }
 
 private:
-#ifdef WIN32
-  HMODULE _handle;
-#else
-  void *_handle;
-#endif
-};
-
-class Plugin
-{
-public:
-  Plugin() : _register_function(NULL)
-  {
-  }
-
-  bool load(const std::string &filename)
-  {
-    if (!_dll_loader.load(filename))
-      return false;
-    _register_function = _dll_loader.register_function();
-
-    if (_register_function)
-    {
-      return true;
-    }
-    else
-    {
-      _dll_loader.free();
-      return false;
-    }
-  }
-
-  void register_plugin(pugg::Kernel *kernel)
-  {
-    _register_function(kernel);
-  }
-
-private:
-  fnRegisterPlugin *_register_function;
-  DllLoader _dll_loader;
+  HandleType _handle;
 };
 
 } // namespace detail
