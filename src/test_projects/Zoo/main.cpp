@@ -1,4 +1,4 @@
-#include "Animal.h"
+#include <Animal.h>
 #include <pugg/Kernel.h>
 
 #include <cstdio>

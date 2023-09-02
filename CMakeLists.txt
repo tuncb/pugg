@@ -1,10 +1,17 @@
-# define minimum cmake version
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.1...3.27)
 
-PROJECT(pugg_examples)
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+project(
+  puggSuite
+  VERSION 1.0
+  LANGUAGES CXX)
 
-add_subdirectory(./projects/Zoo)
-add_subdirectory(./projects/PanthalassaAnimals)
-add_subdirectory(./projects/PangeaAnimals)
+add_subdirectory(./src/pugg)
+
+if( CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR )
+# We are building as stand-alone project
+  add_subdirectory(./src/test_projects/Animal)
+  add_subdirectory(./src/test_projects/Zoo)
+  add_subdirectory(./src/test_projects/PanthalassaAnimals)
+  add_subdirectory(./src/test_projects/PangeaAnimals)
+endif()
+
