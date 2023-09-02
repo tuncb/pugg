@@ -31,9 +31,23 @@ Requirements
 
 Installation
 -----
-No installation is required. Files to include are provided in the include folder of the release. On some Linux platforms you need to link with libdl library.
+Header only library.
+Find the include files under src/pugg/include.
 
-In order to build example projects use [CMake](http://www.cmake.org/)
+You can also fetchcontent it with cmake:
+
+```
+include(FetchContent)
+FetchContent_Declare(pugg GIT_REPOSITORY https://github.com/tuncb/pugg.git)
+FetchContent_MakeAvailable(pugg)
+
+target_link_libraries(MySuperProject PRIVATE pugg)
+```
+
+Note that on some Linux platforms you need to link with libdl library:
+```
+target_link_libraries(MySuperProject PRIVATE ${CMAKE_DL_LIBS})
+```
 
 Tutorial
 -------
