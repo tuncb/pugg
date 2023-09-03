@@ -27,7 +27,7 @@ Features
 
 Requirements
 -------
-* Somewhat current C++ compiler (No C++11 features were used in this version.)
+* Somewhat current C++ compiler.
 
 Installation
 -----
