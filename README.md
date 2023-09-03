@@ -3,13 +3,6 @@ Pugg 1.0.0
 
 A Simple C++ Framework to load classes from dll files in an OO way.
 
-**Contact** For bugs, feature requests and other stuff:
-Tunç Bahçecioğlu tunc.bahcecioglu@gmail.com
-
-* [Pugg @ Bitbucket](https://bitbucket.org/onezeroplus/pugg/)
-* [Pugg @ Sourceforge](https://sourceforge.net/projects/pugg/)
-* [Pugg Website](http://pugg.sourceforge.net/)
-
 Credits
 ----
 * [nuclex blog](http://blog.nuclex-games.com/tutorials/cxx/plugin-architecture/) for giving me the idea and the basic source code to implement pugg.
