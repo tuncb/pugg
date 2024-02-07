@@ -1,4 +1,4 @@
-# Pugg 1.0.0
+# Pugg 1.0.2
 
 A Simple C++ Framework to load classes from dll files in an OO way.
 
@@ -235,6 +235,9 @@ public:
 ~~~~
 
 ## History
+
+1.0.2
+* Adedd `Kernel::add_server<>()` method to add a server extracting the version from the server class.
 
 1.0.1
 * internal code improvements
