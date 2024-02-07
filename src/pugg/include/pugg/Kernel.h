@@ -27,6 +27,12 @@ public:
     _servers[name] = pugg::detail::Server{name, min_driver_version};
   }
 
+  template <class T>
+  void add_server()
+  {
+    add_server(T::server_name(), T::version);
+  }
+
   bool add_driver(pugg::Driver *driver)
   {
     if (!driver)
