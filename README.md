@@ -1,51 +1,56 @@
-Pugg 1.0.0
-======
+# Pugg 1.0.0
 
 A Simple C++ Framework to load classes from dll files in an OO way.
 
-Credits
-----
+## Credits
+
 * [nuclex blog](http://blog.nuclex-games.com/tutorials/cxx/plugin-architecture/) for giving me the idea and the basic source code to implement pugg.
 * Sebastian (hackspider) for bugfix.
 * Szymon Janikowski for fix in old tutorial.
 * Alex Elzenaar for code improvements and code for Linux support.
 
-Features
-----
+## Features
+
 * Auto loading of dll files and classes
 * Version control for loaded plugins
 * Header only library
 * OOP Design
 * Platform independent
 
-Requirements
--------
+## Requirements
+
 * Somewhat current C++ compiler.
 
-Installation
------
+## Installation
+
 Header only library.
 Find the include files under src/pugg/include.
 
 You can also fetchcontent it with cmake:
 
-```
+```cmake
 include(FetchContent)
-FetchContent_Declare(pugg GIT_REPOSITORY https://github.com/tuncb/pugg.git)
+FetchContent_Declare(pugg 
+    GIT_REPOSITORY https://github.com/tuncb/pugg.git
+    # GIT_TAG v1.0.0 # optional
+    GIT_SHALLOW TRUE
+)
 FetchContent_MakeAvailable(pugg)
 
 target_link_libraries(MySuperProject PRIVATE pugg)
 ```
 
 Note that on some Linux platforms you need to link with libdl library:
-```
+
+```cmake
 target_link_libraries(MySuperProject PRIVATE ${CMAKE_DL_LIBS})
 ```
 
-Tutorial
--------
+## Tutorial
 
-Suppose you have an animal class:
+
+Suppose you have an `Animal` class:
+
 ~~~~cpp
 class Animal
 {
@@ -58,7 +63,7 @@ public:
 };
 ~~~~
 
-You want to load subclasses of Animal from dll files.
+You want to load subclasses of `Animal` from dll files.
 
 Add a version and a name to create a server:
 
@@ -101,12 +106,14 @@ public:
     Animal* create() {return new Cat();}
 };
 ~~~~
-Note that version is the same version from the Animal class at the time Cat is compiled. If Animal class changes in the future and increases its version Cat class will be outdated and won't be loaded by Pugg.
+
+Note that version is the same version from the `Animal` class at the time `Cat` is compiled. If `Animal` class changes in the future and increases its version `Cat` class will be outdated and won't be loaded by Pugg.
 
 
-Let's export the Cat class from dll.
+Let's export the `Cat` class from dll.
+
 ~~~~cpp
-#include <pugg\Kernel.h>
+#include <pugg/Kernel.h>
 #include "Cat.h"
 
 #ifdef _WIN32
@@ -120,11 +127,13 @@ extern "C" EXPORTIT void register_pugg_plugin(pugg::Kernel* kernel)
 	kernel->add_driver(new CatDriver());
 }
 ~~~~
-*register_pugg_plugin* function is a special function called by Pugg to load drivers from a dll file.
 
-Now in our main app, we can import dlls and have fun
+ The `register_pugg_plugin` function is a special function called by Pugg to load drivers from a dll file.
+
+Now in our main app, we can import dlls and have fun:
+
 ~~~~cpp
-#include <pugg\Kernel.h>
+#include <pugg/Kernel.h>
 #include <Animal.h>
 
 #include <iostream>
@@ -165,10 +174,12 @@ int main()
 }
 ~~~~
 
-Class Documentation
------------
-###Driver
+## Class Documentation
+
+### Driver
+
 Driver class registers user class to Pugg.
+
 ~~~~cpp
 // /include/pugg/Driver.h
 namespace pugg {
@@ -188,7 +199,8 @@ public:
 }
 ~~~~
 
-###Kernel
+### Kernel
+
 ~~~~cpp
 // /include/pugg/Kernel.h
 namespace pugg {
@@ -222,8 +234,8 @@ public:
 }
 ~~~~
 
-History
---------
+## History
+
 1.0.1
 * internal code improvements
 * removed conan support
