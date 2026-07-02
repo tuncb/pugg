@@ -6,11 +6,13 @@
 #ifdef _WIN32
 #define EXPORTIT __declspec(dllexport)
 #else
-#define EXPORTIT
+#define EXPORTIT __attribute__((visibility("default")))
 #endif
 
-extern "C" EXPORTIT void register_pugg_plugin(pugg::Kernel *kernel)
+extern "C" EXPORTIT bool register_pugg_plugin(pugg::Kernel *kernel)
 {
-  (void)kernel->add_driver(std::make_unique<FishDriver>());
-  (void)kernel->add_driver(std::make_unique<WhaleDriver>());
+  if (!kernel)
+    return false;
+  return kernel->add_driver(std::make_unique<FishDriver>()) &&
+         kernel->add_driver(std::make_unique<WhaleDriver>());
 }

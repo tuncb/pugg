@@ -147,15 +147,38 @@ TEST_CASE("add_driver accepts driver with exact minimum version", "[kernel][driv
   CHECK(kernel.add_driver(std::make_unique<RedWidgetDriver>()));
 }
 
-TEST_CASE("add_driver replaces existing driver with same name", "[kernel][driver]")
+TEST_CASE("add_driver rejects duplicate driver name", "[kernel][driver]")
 {
+  // Replacing would destroy the first driver while callers may still hold
+  // pointers to it, so a duplicate name must be rejected instead.
   pugg::Kernel kernel;
   kernel.add_server<Widget>();
   CHECK(kernel.add_driver(std::make_unique<RedWidgetDriver>()));
-  CHECK(kernel.add_driver(std::make_unique<RedWidgetDriver>())); // second add also succeeds
-  // Only one entry under that name
+  auto second = kernel.add_driver(std::make_unique<RedWidgetDriver>());
+  CHECK_FALSE(second);
+  CHECK(second.reason == pugg::AddDriverResult::Reason::duplicate_name);
+  // The first registration is untouched
   auto all = kernel.get_all_drivers<WidgetDriver>(Widget::server_name());
   CHECK(all.size() == 1);
+}
+
+TEST_CASE("add_driver reports the failure reason and last_error", "[kernel][driver]")
+{
+  using Reason = pugg::AddDriverResult::Reason;
+  pugg::Kernel kernel;
+
+  CHECK(kernel.add_driver(nullptr).reason == Reason::null_driver);
+
+  CHECK(kernel.add_driver(std::make_unique<RedWidgetDriver>()).reason ==
+        Reason::unknown_server);
+  CHECK_FALSE(kernel.last_error().empty());
+
+  kernel.add_server<Widget>();
+  CHECK(kernel.add_driver(std::make_unique<OldWidgetDriver>()).reason ==
+        Reason::version_mismatch);
+  CHECK_FALSE(kernel.last_error().empty());
+
+  CHECK(kernel.add_driver(std::make_unique<RedWidgetDriver>()).reason == Reason::ok);
 }
 
 // ── Kernel::get_driver ───────────────────────────────────────────────────────

@@ -31,6 +31,40 @@ TEST_CASE("load_plugin returns false for a missing file", "[integration][load]")
   pugg::Kernel kernel;
   kernel.add_server<Animal>();
   CHECK_FALSE(kernel.load_plugin("no_such_plugin.so"));
+  CHECK_FALSE(kernel.last_error().empty());
+}
+
+TEST_CASE("load_plugin fails and unloads a plugin whose registration fails", "[integration][load]")
+{
+  // No Animal server registered: every add_driver call inside the plugin's
+  // registration function fails, so the function returns false and the
+  // library must be rejected (and unloaded) instead of being kept half-loaded.
+  pugg::Kernel kernel;
+  CHECK_FALSE(kernel.load_plugin(PANGEA_PLUGIN));
+  CHECK_FALSE(kernel.last_error().empty());
+}
+
+TEST_CASE("load_plugin accepts a std::filesystem::path", "[integration][load]")
+{
+  pugg::Kernel kernel;
+  kernel.add_server<Animal>();
+  CHECK(kernel.load_plugin(std::filesystem::path{PANGEA_PLUGIN}));
+}
+
+TEST_CASE("failed re-registration is rolled back without touching existing drivers",
+          "[integration][load]")
+{
+  pugg::Kernel kernel;
+  kernel.add_server<Animal>();
+  REQUIRE(kernel.load_plugin(PANGEA_PLUGIN));
+
+  // Loading the same plugin again fails on the duplicate driver names; the
+  // rollback must remove only what the failed registration added, leaving
+  // the original drivers untouched and the kernel safe to destroy.
+  CHECK_FALSE(kernel.load_plugin(PANGEA_PLUGIN));
+
+  auto drivers = kernel.get_all_drivers<AnimalDriver>(Animal::server_name());
+  CHECK(drivers.size() == 2); // Cat + Dog from the first load
 }
 
 TEST_CASE("load_plugin registers drivers from plugin", "[integration][load]")
