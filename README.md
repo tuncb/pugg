@@ -1,3 +1,6 @@
+> [!CAUTION] 
+> This repo is archived, I will not accept any PRs or issues anymore. Feel free to use the code in anyway you like. Cheers.
+
 # Pugg 1.0.2
 
 A Simple C++ Framework to load classes from dll files in an OO way.
